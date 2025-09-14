@@ -4,13 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.supercompras.ui.theme.SuperComprasTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,7 +24,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             SuperComprasTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Titulo(modifier = Modifier.padding(innerPadding))
+                    ImagemTopo(modifier = Modifier.padding(innerPadding))
+//                  Titulo(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
@@ -40,6 +45,15 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     )
 }
 
+@Composable
+fun ImagemTopo(modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(R.drawable.imagem_topo),
+        contentDescription = null,
+        modifier.size(160.dp)
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 fun TituloPreview() {
@@ -53,6 +67,14 @@ fun TituloPreview() {
 fun GreetingPreview() {
     SuperComprasTheme {
         Greeting("Android")
+    }
+}
+
+@Preview
+@Composable
+private fun ImagemTopoPreview() {
+    SuperComprasTheme {
+        ImagemTopo()
     }
 }
 
