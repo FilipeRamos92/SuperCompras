@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -48,27 +48,40 @@ class MainActivity : ComponentActivity() {
         setContent {
             SuperComprasTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(
-                        verticalArrangement = Arrangement.Top,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(innerPadding)
-                    ) {
-                        ImagemTopo()
-                        AdicionarItem()
-                        BotaoAdicionarItem(onClick = {})
-                        Titulo(texto = "Lista de Compras")
-                        ItemDaLista()
-                        Titulo(texto = "Comprado")
-                    }
+                    ListaDeCompras(Modifier.padding(innerPadding))
                 }
             }
         }
     }
 }
 
+@Composable
+fun ListaDeCompras(modifier: Modifier = Modifier) {
+    var listaDeItens = rememberSaveable { mutableStateOf(listOf<ItemCompra>()) }
+
+    Column(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
+        ImagemTopo()
+        AdicionarItem(aoSalvarItem = { textoNovo ->
+            listaDeItens.value = listaDeItens.value + ItemCompra(texto = textoNovo)
+        })
+        Spacer(modifier = Modifier.padding(48.dp))
+        Titulo(texto = "Lista de Compras")
+        Column {
+            listaDeItens.value.forEach { item ->
+                ItemDaLista(item = item)
+            }
+        }
+        Titulo(texto = "Comprado")
+    }
+}
+
 
 @Composable
-fun AdicionarItem(modifier: Modifier = Modifier) {
+fun AdicionarItem(aoSalvarItem: (texto: String) -> Unit, modifier: Modifier = Modifier) {
     var texto = rememberSaveable { mutableStateOf("") }
 
     OutlinedTextField(
@@ -87,12 +100,12 @@ fun AdicionarItem(modifier: Modifier = Modifier) {
             .padding(8.dp)
             .fillMaxWidth(),
     )
-}
 
-@Composable
-fun BotaoAdicionarItem(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(
-        onClick = onClick,
+        onClick = {
+            aoSalvarItem(texto.value)
+            texto.value = ""
+                  },
         shape = RoundedCornerShape(24.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Coral),
         modifier = modifier
@@ -100,6 +113,7 @@ fun BotaoAdicionarItem(onClick: () -> Unit, modifier: Modifier = Modifier) {
         Text(
             text = "Salvar item",
             color = Color.White,
+            style = Typography.bodyMedium,
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         )
@@ -112,7 +126,7 @@ fun Titulo(texto: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ItemDaLista(modifier: Modifier = Modifier) {
+fun ItemDaLista(item: ItemCompra, modifier: Modifier = Modifier) {
     Column(verticalArrangement = Arrangement.Top, modifier = modifier) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -127,7 +141,7 @@ fun ItemDaLista(modifier: Modifier = Modifier) {
                     .requiredSize(24.dp)
             )
             Text(
-                text = "Suco",
+                text = item.texto,
                 style = Typography.bodyMedium,
                 textAlign = TextAlign.Start,
                 modifier = Modifier.weight(1f)
@@ -168,7 +182,7 @@ fun Icone(icone: ImageVector, modifier: Modifier = Modifier) {
 @Composable
 private fun AdicionarItemPreview() {
     SuperComprasTheme {
-        AdicionarItem()
+        AdicionarItem(aoSalvarItem = {})
     }
 }
 
@@ -192,15 +206,7 @@ private fun ImagemTopoPreview() {
 @Composable
 private fun ItemDaListaPreview() {
     SuperComprasTheme {
-        ItemDaLista()
-    }
-}
-
-@Preview
-@Composable
-private fun BotaoAdicionarItemPreview() {
-    SuperComprasTheme {
-        BotaoAdicionarItem(onClick = {})
+        ItemDaLista(item = ItemCompra(texto = "Arroz"))
     }
 }
 
@@ -212,3 +218,7 @@ private fun IconePreview() {
     }
 }
 
+
+data class ItemCompra(
+    val texto: String
+)
