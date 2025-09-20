@@ -19,7 +19,10 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -38,19 +41,28 @@ class MainActivity : ComponentActivity() {
         setContent {
             SuperComprasTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(verticalArrangement = Arrangement.Top) {
-                        ImagemTopo(modifier = Modifier.padding(innerPadding))
-                        Titulo(
-                            texto = "Lista de Compras", modifier = Modifier.padding(innerPadding)
-                        )
-                        ItemDaLista(modifier = Modifier.padding(innerPadding))
-                        Titulo(texto = "Comprado", modifier = Modifier.padding(innerPadding))
-                        //                    Icone(icone = Icons.Default.Delete, modifier = Modifier.padding(innerPadding))
+                    Column(verticalArrangement = Arrangement.Top, modifier = Modifier.padding(innerPadding)) {
+                        ImagemTopo()
+                        Titulo(texto = "Lista de Compras")
+                        ItemDaLista()
+                        Titulo(texto = "Comprado")
                     }
                 }
             }
         }
     }
+}
+
+
+@Composable
+fun AdicionarItem(modifier: Modifier = Modifier) {
+    var texto = remember { mutableStateOf("") }
+
+    TextField(
+        value = "",
+        onValueChange = { texto.value = it },
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -76,8 +88,9 @@ fun ItemDaLista(modifier: Modifier = Modifier) {
             Text(
                 text = "Suco",
                 style = Typography.bodyMedium,
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Start,
                 modifier = Modifier
+                    .weight(1f)
             )
             Icone(
                 icone = Icons.Default.Delete,
@@ -91,7 +104,11 @@ fun ItemDaLista(modifier: Modifier = Modifier) {
                     .size(16.dp)
             )
         }
-        Text(text = "Segunda-feira (31/10/2022) às 08:30")
+        Text(
+            text = "Segunda-feira (31/10/2022) às 08:30",
+            style = Typography.labelSmall,
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
 
 }
@@ -108,6 +125,14 @@ fun ImagemTopo(modifier: Modifier = Modifier) {
 @Composable
 fun Icone(icone: ImageVector, modifier: Modifier = Modifier) {
     Icon(icone, contentDescription = null, tint = Marinho, modifier = modifier)
+}
+
+@Preview
+@Composable
+private fun AdicionarItemPreview() {
+    SuperComprasTheme {
+        AdicionarItem()
+    }
 }
 
 @Preview(showBackground = true)
