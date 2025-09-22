@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -89,10 +90,10 @@ fun ListaDeCompras(modifier: Modifier = Modifier) {
                 aoRemoverItem = { itemRemovido ->
                     listaDeItens.value = listaDeItens.value - itemRemovido
                 },
-                aoEditarItem = { itemEditado ->
+                aoEditarItem = { itemEditado, novoTexto ->
                     listaDeItens.value = listaDeItens.value.map { itemAtual ->
                         if (itemAtual == itemEditado) {
-                            itemAtual.copy(texto = itemEditado.texto)
+                            itemAtual.copy(texto = novoTexto)
                         } else {
                             itemAtual
                         }
@@ -119,10 +120,10 @@ fun ListaDeCompras(modifier: Modifier = Modifier) {
                 aoRemoverItem = { itemRemovido ->
                     listaDeItens.value = listaDeItens.value - itemRemovido
                 },
-                aoEditarItem = { itemEditado ->
+                aoEditarItem = { itemEditado, novoTexto ->
                     listaDeItens.value = listaDeItens.value.map { itemAtual ->
                         if (itemAtual == itemEditado) {
-                            itemAtual.copy(texto = itemEditado.texto)
+                            itemAtual.copy(texto = novoTexto)
                         } else {
                             itemAtual
                         }
@@ -139,7 +140,7 @@ fun ListaDeItens(
     lista: MutableState<List<ItemCompra>>,
     aoMudarStatus: (item: ItemCompra) -> Unit = {},
     aoRemoverItem: (item: ItemCompra) -> Unit = {},
-    aoEditarItem: (item: ItemCompra) -> Unit = {},
+    aoEditarItem: (item: ItemCompra, novoTexto: String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -205,7 +206,7 @@ fun ItemDaLista(
     item: ItemCompra,
     aoMudarStatus: (item: ItemCompra) -> Unit = {},
     aoRemoverItem: (item: ItemCompra) -> Unit = {},
-    aoEditarItem: (item: ItemCompra) -> Unit = {},
+    aoEditarItem: (item: ItemCompra, novoTexto: String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
     Column(verticalArrangement = Arrangement.Top, modifier = modifier) {
@@ -214,6 +215,10 @@ fun ItemDaLista(
             horizontalArrangement = Arrangement.Start,
             modifier = Modifier
         ) {
+
+            var textoEditado = rememberSaveable { mutableStateOf(item.texto) }
+            var emEdicao = rememberSaveable { mutableStateOf(false) }
+
             Checkbox(
                 checked = item.foiComprado,
                 onCheckedChange = {
@@ -223,12 +228,39 @@ fun ItemDaLista(
                     .padding(end = 8.dp)
                     .requiredSize(24.dp)
             )
-            Text(
-                text = item.texto,
-                style = Typography.bodyMedium,
-                textAlign = TextAlign.Start,
-                modifier = Modifier.weight(1f)
-            )
+
+            if (emEdicao.value) {
+                OutlinedTextField(
+                    value = textoEditado.value,
+                    onValueChange = { textoEditado.value = it },
+                    shape = RoundedCornerShape(24.dp),
+                    singleLine = true,
+                    modifier = Modifier
+                )
+
+                IconButton(
+                    onClick = {
+                        aoEditarItem(item, textoEditado.value)
+                        emEdicao.value = false
+                    },
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                ) {
+                    Icone(
+                        icone = Icons.Default.Done,
+                        modifier = Modifier
+                            .size(16.dp)
+                    )
+                }
+            } else {
+                Text(
+                    text = item.texto,
+                    style = Typography.bodyMedium,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
             IconButton(
                 onClick = {
                     aoRemoverItem(item)
@@ -245,7 +277,7 @@ fun ItemDaLista(
 
             IconButton(
                 onClick = {
-                    aoEditarItem(item)
+                    emEdicao.value = true
                 },
                 modifier = Modifier
             ) {
