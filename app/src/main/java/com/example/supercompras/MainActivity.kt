@@ -29,8 +29,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -60,7 +62,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ListaDeCompras(modifier: Modifier = Modifier) {
-    var listaDeItens = rememberSaveable { mutableStateOf(listOf<ItemCompra>()) }
+    var listaDeItens by rememberSaveable { mutableStateOf(listOf<ItemCompra>()) }
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -69,17 +71,17 @@ fun ListaDeCompras(modifier: Modifier = Modifier) {
     ) {
         ImagemTopo()
         AdicionarItem(aoSalvarItem = { textoNovo ->
-            listaDeItens.value = listaDeItens.value + ItemCompra(texto = textoNovo)
+            listaDeItens = listaDeItens + ItemCompra(texto = textoNovo)
         })
         Spacer(modifier = Modifier.padding(48.dp))
 
         Titulo(texto = "Lista de Compras")
 
-        if (listaDeItens.value.any { item -> !item.foiComprado }) {
+        if (listaDeItens.any { item -> !item.foiComprado }) {
             ListaDeItens(
                 lista = listaDeItens,
                 aoMudarStatus = { itemSelecionado ->
-                    listaDeItens.value = listaDeItens.value.map { itemMap ->
+                    listaDeItens = listaDeItens.map { itemMap ->
                         if (itemSelecionado == itemMap) {
                             itemSelecionado.copy(foiComprado = !itemSelecionado.foiComprado)
                         } else {
@@ -88,10 +90,10 @@ fun ListaDeCompras(modifier: Modifier = Modifier) {
                     }
                 },
                 aoRemoverItem = { itemRemovido ->
-                    listaDeItens.value = listaDeItens.value - itemRemovido
+                    listaDeItens = listaDeItens - itemRemovido
                 },
                 aoEditarItem = { itemEditado, novoTexto ->
-                    listaDeItens.value = listaDeItens.value.map { itemAtual ->
+                    listaDeItens = listaDeItens.map { itemAtual ->
                         if (itemAtual == itemEditado) {
                             itemAtual.copy(texto = novoTexto)
                         } else {
@@ -105,11 +107,11 @@ fun ListaDeCompras(modifier: Modifier = Modifier) {
 
         Titulo(texto = "Comprado")
 
-        if (listaDeItens.value.any { item -> item.foiComprado }) {
+        if (listaDeItens.any { item -> item.foiComprado }) {
             ListaDeItens(
                 lista = listaDeItens,
                 aoMudarStatus = { itemSelecionado ->
-                    listaDeItens.value = listaDeItens.value.map { itemMap ->
+                    listaDeItens = listaDeItens.map { itemMap ->
                         if (itemSelecionado == itemMap) {
                             itemSelecionado.copy(foiComprado = !itemSelecionado.foiComprado)
                         } else {
@@ -118,10 +120,10 @@ fun ListaDeCompras(modifier: Modifier = Modifier) {
                     }
                 },
                 aoRemoverItem = { itemRemovido ->
-                    listaDeItens.value = listaDeItens.value - itemRemovido
+                    listaDeItens = listaDeItens - itemRemovido
                 },
                 aoEditarItem = { itemEditado, novoTexto ->
-                    listaDeItens.value = listaDeItens.value.map { itemAtual ->
+                    listaDeItens = listaDeItens.map { itemAtual ->
                         if (itemAtual == itemEditado) {
                             itemAtual.copy(texto = novoTexto)
                         } else {
@@ -137,14 +139,14 @@ fun ListaDeCompras(modifier: Modifier = Modifier) {
 
 @Composable
 fun ListaDeItens(
-    lista: MutableState<List<ItemCompra>>,
+    lista: List<ItemCompra>,
     aoMudarStatus: (item: ItemCompra) -> Unit = {},
     aoRemoverItem: (item: ItemCompra) -> Unit = {},
     aoEditarItem: (item: ItemCompra, novoTexto: String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        lista.value.forEach { item ->
+        lista.forEach { item ->
             ItemDaLista(
                 item = item,
                 aoMudarStatus = aoMudarStatus,
@@ -216,8 +218,8 @@ fun ItemDaLista(
             modifier = Modifier
         ) {
 
-            var textoEditado = rememberSaveable { mutableStateOf(item.texto) }
-            var emEdicao = rememberSaveable { mutableStateOf(false) }
+            var textoEditado by rememberSaveable { mutableStateOf(item.texto) }
+            var emEdicao by rememberSaveable { mutableStateOf(false) }
 
             Checkbox(
                 checked = item.foiComprado,
@@ -229,10 +231,10 @@ fun ItemDaLista(
                     .requiredSize(24.dp)
             )
 
-            if (emEdicao.value) {
+            if (emEdicao) {
                 OutlinedTextField(
-                    value = textoEditado.value,
-                    onValueChange = { textoEditado.value = it },
+                    value = textoEditado,
+                    onValueChange = { textoEditado = it },
                     shape = RoundedCornerShape(24.dp),
                     singleLine = true,
                     modifier = Modifier
@@ -240,8 +242,8 @@ fun ItemDaLista(
 
                 IconButton(
                     onClick = {
-                        aoEditarItem(item, textoEditado.value)
-                        emEdicao.value = false
+                        aoEditarItem(item, textoEditado)
+                        emEdicao = false
                     },
                     modifier = Modifier
                         .padding(end = 8.dp)
@@ -277,7 +279,7 @@ fun ItemDaLista(
 
             IconButton(
                 onClick = {
-                    emEdicao.value = true
+                    emEdicao = true
                 },
                 modifier = Modifier
             ) {
